@@ -1,272 +1,86 @@
-import { useState, useEffect } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { useState } from "react";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
-import MapView from "./components/Map";
-import SocialFeed from "./components/SocialFeed";
-import AlertPanel from "./components/AlertPanel";
-import StatsBar from "./components/StatsBar";
+import Navbar from "./components/Navbar";
 import Chatbot from "./components/Chatbot";
-import RedditFeed from "./components/RedditFeed";
-import Home from "./components/Home";
+import Home from "./pages/Home";
+import LiveMap from "./pages/LiveMap";
+import News from "./pages/News";
+import Sources from "./pages/Sources";
 
-// DEMO DATA
-const DEMO_POSTS = [
-  {
-    text: "Flood reported in Nagpur, rescue teams deployed",
-    city: "Nagpur",
-    lat: 21.1458,
-    lon: 79.0882,
-    urgency: "HIGH",
-    disaster_type: "flood",
-    time: new Date().toISOString()
-  },
-  {
-    text: "Earthquake tremors felt in Delhi",
-    city: "Delhi",
-    lat: 28.6139,
-    lon: 77.2090,
-    urgency: "MEDIUM",
-    disaster_type: "earthquake",
-    time: new Date().toISOString()
-  },
-  {
-    text: "Heavy rainfall in Mumbai",
-    city: "Mumbai",
-    lat: 19.0760,
-    lon: 72.8777,
-    urgency: "LOW",
-    disaster_type: "rain",
-    time: new Date().toISOString()
-  }
-];
+function DetectionPage() {
+  return (
+    <div className="min-h-0 flex-1 bg-crisis-bg px-4 py-12 sm:px-6">
+      <div className="mx-auto max-w-3xl">
+        <h1 className="text-3xl font-bold text-white">AI detection</h1>
+        <p className="mt-4 leading-relaxed text-slate-400">
+          Incident prioritization and narrative summaries combine feed urgency, disaster type, and—when available—weather context. Tune thresholds and ingestion on the backend; this view is a roadmap surface for richer model telemetry and verification workflows.
+        </p>
+        <div className="mt-8 rounded-2xl border border-cyan-500/20 bg-cyan-950/20 p-6 backdrop-blur-md">
+          <p className="text-sm text-cyan-100/90">
+            Connect live detection metrics here (scores, false-positive flags, human labels) without changing existing API contracts.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ForecastPage() {
+  return (
+    <div className="min-h-0 flex-1 bg-crisis-bg px-4 py-12 sm:px-6">
+      <div className="mx-auto max-w-3xl">
+        <h1 className="text-3xl font-bold text-white">Forecast & risk</h1>
+        <p className="mt-4 leading-relaxed text-slate-400">
+          Longer-horizon outlooks can layer seasonal climate signals and historical event density on top of OpenWeather snapshots. The Live Map already surfaces per-city risk—extend this page with charts when your pipeline exposes forecast endpoints.
+        </p>
+        <div className="mt-8 rounded-2xl border border-blue-500/20 bg-blue-950/20 p-6 backdrop-blur-md">
+          <p className="text-sm text-blue-100/90">
+            No frontend API changes required; add forecast routes server-side and bind them here.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
-  const [mode, setMode] = useState("DEMO");
-  const [cities, setCities] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [allPosts, setAllPosts] = useState([]);
-  const [selectedCity, setSelectedCity] = useState(null);
-  const [filter, setFilter] = useState("ALL");
-  const [loading, setLoading] = useState(false);
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [chatOpen, setChatOpen] = useState(false);
-
-  const fetchData = async (selectedDate) => {
-    setLoading(true);
-
-    if (mode === "DEMO") {
-      const citiesMap = {};
-
-      DEMO_POSTS.forEach(p => {
-        if (!citiesMap[p.city]) {
-          citiesMap[p.city] = {
-            city: p.city,
-            lat: p.lat,
-            lon: p.lon,
-            total: 0,
-            high_count: 0
-          };
-        }
-        citiesMap[p.city].total++;
-        if (p.urgency === "HIGH") citiesMap[p.city].high_count++;
-      });
-
-      setCities(Object.values(citiesMap));
-      setAllPosts(DEMO_POSTS);
-      setStats({
-        total: DEMO_POSTS.length,
-        high: DEMO_POSTS.filter(p => p.urgency === "HIGH").length
-      });
-
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const formattedDate = new Date(selectedDate)
-        .toISOString()
-        .split("T")[0];
-
-      const [citiesRes, feedRes, statsRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/cities?date=${formattedDate}`),
-        fetch(`http://localhost:8000/api/feed?date=${formattedDate}`),
-        fetch(`http://localhost:8000/api/stats?date=${formattedDate}`)
-      ]);
-
-      const citiesData = await citiesRes.json();
-      const feedData = await feedRes.json();
-      const statsData = await statsRes.json();
-
-      setCities(citiesData);
-      setAllPosts(feedData.posts || []);
-      setStats(statsData);
-
-    } catch (err) {
-      console.error(err);
-      setCities([]);
-      setAllPosts([]);
-      setStats(null);
-    }
-
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchData(date);
-  }, [date, mode]);
-
-  const handleCityClick = (city) => {
-    setSelectedCity(city);
-    setFilter("ALL");
-  };
-
-  const visiblePosts = allPosts.filter(p => {
-    const matchCity = selectedCity ? p.city === selectedCity.city : true;
-    const matchFilter = filter === "ALL" ? true : p.urgency === filter;
-    return matchCity && matchFilter;
+  const [mapCtx, setMapCtx] = useState({
+    selectedCity: null,
+    selectedWeather: null,
   });
+  const location = useLocation();
 
   return (
-    <>
-      {/* 🔥 NAVBAR */}
-      <nav style={{
-        padding: "10px",
-        background: "#0f172a",
-        display: "flex",
-        gap: "20px"
-      }}>
-        <Link to="/" style={{ color: "white", textDecoration: "none" }}>
-          🏠 Home
-        </Link>
+    <div className="flex min-h-screen flex-col bg-crisis-bg">
+      <Navbar />
+      <div
+        key={location.pathname}
+        className="animate-page-in flex min-h-0 flex-1 flex-col"
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/livemap"
+            element={
+              <LiveMap onMapContext={setMapCtx} chatOpen={chatOpen} />
+            }
+          />
+          <Route path="/news" element={<News />} />
+          <Route path="/sources" element={<Sources />} />
+          <Route path="/detection" element={<DetectionPage />} />
+          <Route path="/forecast" element={<ForecastPage />} />
+          <Route path="/dashboard" element={<Navigate to="/livemap" replace />} />
+        </Routes>
+      </div>
 
-        <Link to="/dashboard" style={{ color: "white", textDecoration: "none" }}>
-          📊 Dashboard
-        </Link>
-      </nav>
-
-      <Routes>
-
-        {/* 🏠 HOME */}
-        <Route path="/" element={<Home />} />
-
-        {/* 📊 DASHBOARD */}
-        <Route path="/dashboard" element={
-
-          <div className="app-shell">
-
-            {/* TOP BAR */}
-            <header className="topbar">
-              <div className="topbar-brand">
-                <span className="brand-name">🌍 CRISISLENS</span>
-              </div>
-
-              <button
-                onClick={() => setMode(mode === "DEMO" ? "LIVE" : "DEMO")}
-                style={{
-                  padding: "6px 10px",
-                  borderRadius: "6px",
-                  background: mode === "DEMO" ? "#22c55e" : "#ef4444",
-                  color: "white",
-                  border: "none",
-                  marginRight: "10px"
-                }}
-              >
-                {mode === "DEMO" ? "🧪 DEMO" : "🌐 LIVE"}
-              </button>
-
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                style={{ padding: "6px", borderRadius: "6px" }}
-              />
-
-              <StatsBar stats={stats} />
-
-              <button
-                onClick={() => setChatOpen(!chatOpen)}
-                style={{
-                  marginLeft: "10px",
-                  background: "#6366f1",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "6px 10px"
-                }}
-              >
-                🤖 AI
-              </button>
-            </header>
-
-            <AlertPanel cities={cities} />
-
-            {/* MAIN */}
-            <main
-              className="main-layout"
-              style={{
-                display: "flex",
-                height: "calc(100vh - 120px)",
-                transition: "all 0.3s ease",
-                marginRight: chatOpen ? "350px" : "0px"
-              }}
-            >
-              {/* MAP */}
-              <div className="map-pane" style={{ flex: 2 }}>
-                <MapView
-                  cities={cities}
-                  selectedCity={selectedCity}
-                  onCityClick={handleCityClick}
-                />
-              </div>
-
-              {/* RIGHT PANEL */}
-              <div
-                className="feed-pane"
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%"
-                }}
-              >
-                {/* SOCIAL */}
-                <div style={{ flex: 2, overflow: "hidden" }}>
-                  <SocialFeed
-                    city={selectedCity}
-                    posts={visiblePosts}
-                    loading={loading}
-                    filter={filter}
-                    onFilter={setFilter}
-                  />
-                </div>
-
-                {/* REDDIT */}
-                <div
-                  style={{
-                    flex: 1,
-                    borderTop: "1px solid #333",
-                    overflowY: "auto"
-                  }}
-                >
-                  <RedditFeed
-                    query={
-                      selectedCity
-                        ? `${selectedCity.city} disaster`
-                        : "disaster"
-                    }
-                  />
-                </div>
-              </div>
-            </main>
-
-            {/* CHATBOT */}
-            <Chatbot open={chatOpen} setOpen={setChatOpen} />
-
-          </div>
-
-        } />
-
-      </Routes>
-    </>
+      <Chatbot
+        open={chatOpen}
+        setOpen={setChatOpen}
+        selectedCity={mapCtx.selectedCity}
+        selectedWeather={mapCtx.selectedWeather}
+      />
+    </div>
   );
 }

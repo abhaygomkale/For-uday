@@ -1,0 +1,13 @@
+{
+  "total": 3,
+  "high": 2,
+  "medium": 0,
+  "low": 1,
+  "last_updated": "2026-03-25T10:36:01",
+  "sources": {
+    "gdacs": 0,
+    "usgs": 0,
+    "nasa": 0,
+    "rss": 3
+  }
+}

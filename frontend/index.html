@@ -33,8 +33,8 @@
       --mono:         'JetBrains Mono', monospace;
     }
 
-    html, body, #root { height: 100%; width: 100%; overflow: hidden; }
-    body { font-family: var(--font); background: var(--bg-base); color: var(--text-1); }
+    html, body, #root { min-height: 100%; width: 100%; }
+    body { font-family: var(--font); background: var(--bg-base); color: var(--text-1); overflow-x: hidden; }
 
     /* ─── App shell ─── */
     .app-shell { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
@@ -115,15 +115,32 @@
     .t-dot  { width:5px; height:5px; border-radius:50%; background:var(--red); flex-shrink:0; }
     .t-sep  { opacity:0.25; margin-left:6px; }
 
-    /* ─── Main layout ─── */
-    .main-layout { display: flex; flex: 1; overflow: hidden; }
-    .map-pane  { flex: 1; position: relative; min-width: 0; }
+    /* ─── Main layout (map ~70% / side ~30% on wide screens) ─── */
+    .main-layout { display: flex; flex: 1; overflow: hidden; flex-direction: column; }
+    @media (min-width: 1024px) {
+      .main-layout { flex-direction: row; }
+    }
+    .map-pane  {
+      flex: 1 1 70%;
+      width: 100%;
+      position: relative;
+      min-width: 0;
+      min-height: 200px;
+    }
+    @media (min-width: 1024px) {
+      .map-pane { width: 70%; }
+    }
     .feed-pane {
-      width: 390px; min-width: 390px;
+      flex: 1 1 30%;
+      width: 100%;
+      min-width: 0;
       display: flex; flex-direction: column;
       background: var(--bg-surface);
       border-left: 1px solid var(--border);
       overflow: hidden;
+    }
+    @media (min-width: 1024px) {
+      .feed-pane { width: 30%; border-top: none; }
     }
 
     /* ─── Feed ─── */
@@ -231,6 +248,12 @@
     .mk.sel .mk-dot  { width:15px; height:15px; }
     @keyframes pulse     { 0%,100%{transform:scale(1);opacity:0.45} 50%{transform:scale(1.6);opacity:0.15} }
     @keyframes pulse-sel { 0%,100%{transform:scale(1);opacity:1}    50%{transform:scale(1.9);opacity:0.35} }
+
+    /* Weather Glows */
+    .mk.glow-blue .mk-dot { box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.8); background: #3b82f6 !important; }
+    .mk.glow-red .mk-dot { box-shadow: 0 0 15px 5px rgba(239, 68, 68, 0.8); background: #ef4444 !important; }
+    .mk.glow-blink .mk-dot { animation: weather-blink 0.5s infinite alternate; }
+    @keyframes weather-blink { from { box-shadow: 0 0 5px #fff; } to { box-shadow: 0 0 20px 10px #f59e0b; } }
   </style>
 </head>
 <body>

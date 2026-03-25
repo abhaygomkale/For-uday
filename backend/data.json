@@ -1,11 +1,41 @@
 [
   {
-    "text": "Flood in Nagpur, need help urgently",
-    "city": "Nagpur",
-    "lat": 21.1458,
-    "lon": 79.0882,
+    "text": "telangana cms emergency meeting on petrol, lpg and urea stocks on march 25 afternoon. urea stocks too would be discussed at the meeting with officials",
+    "original_text": "Telangana CM\u2019s emergency meeting on petrol, LPG and urea stocks on March 25 afternoon. Urea stocks too would be discussed at the meeting with officials",
+    "city": "India",
+    "lat": 20.5937,
+    "lon": 78.9629,
     "urgency": "HIGH",
+    "disaster_type": "general",
+    "confidence": 0.3,
+    "source": "RSS:The Hindu",
+    "date": "2026-03-25",
+    "time": "2026-03-25T10:15:35"
+  },
+  {
+    "text": "three killed in a road accident in kurnool. kummari sekhar was first hit by a speeding lorry and was left critically injured on the road as locals rushed to rescue him, another lorry rammed into the group, killing two of the rescuers on the spot",
+    "original_text": "Three killed in a road accident in Kurnool. Kummari Sekhar was first hit by a speeding lorry and was left critically injured on the road; as locals rushed to rescue him, another lorry rammed into the group, killing two of the rescuers on the spot",
+    "city": "India",
+    "lat": 20.5937,
+    "lon": 78.9629,
+    "urgency": "HIGH",
+    "disaster_type": "general",
+    "confidence": 0.3,
+    "source": "RSS:The Hindu",
+    "date": "2026-03-25",
+    "time": "2026-03-25T09:35:32"
+  },
+  {
+    "text": "assam floats tender for satellites to monitor floods, borders. chief minister sarma announced the projectin the 2025-26 state budget the procurement is for at least five satellites in low-earth orbit",
+    "original_text": "Assam floats tender for satellites to monitor floods, borders. Chief Minister Sarma announced the project\u00a0in the 2025-26 State Budget; The procurement is for at least five satellites in low-earth orbit",
+    "city": "India",
+    "lat": 20.5937,
+    "lon": 78.9629,
+    "urgency": "LOW",
     "disaster_type": "flood",
-    "time": "2026-03-24"
+    "confidence": 0.25,
+    "source": "RSS:The Hindu",
+    "date": "2026-03-25",
+    "time": "2026-03-25T09:15:27"
   }
 ]
